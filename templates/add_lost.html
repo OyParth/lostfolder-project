@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="form-container">
+
+    <h2>🔍 Report a Lost Item</h2>
+    <p class="page-desc">
+        Provide details to help others identify your lost item.
+    </p>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data" class="form-card">
+
+        <label>Item Title</label>
+        <input type="text" name="title" placeholder="e.g. iPhone 13" required>
+
+        <label>Description</label>
+        <textarea name="description" placeholder="Describe the item..." required></textarea>
+
+        <label>Last Seen Location</label>
+        <input type="text" name="location" placeholder="e.g. Cafeteria" required>
+
+        <label>Upload Image (Optional)</label>
+        <input type="file" name="image" accept="image/*">
+
+        <button type="submit" class="btn primary">
+            Submit Lost Report
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

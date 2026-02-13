@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="form-container">
+
+    <h2>📦 Report a Found Item</h2>
+    <p class="page-desc">
+        Help reunite items with their rightful owners.
+    </p>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data" class="form-card">
+
+        <label>Item Title</label>
+        <input type="text" name="title" placeholder="e.g. Black Wallet" required>
+
+        <label>Description</label>
+        <textarea name="description" placeholder="Describe the item..." required></textarea>
+
+        <label>Found Location</label>
+        <input type="text" name="location" placeholder="e.g. Library 2nd Floor" required>
+
+        <label>Upload Image (Optional)</label>
+        <input type="file" name="image" accept="image/*">
+
+        <button type="submit" class="btn success">
+            Submit Found Item
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

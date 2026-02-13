@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>📦 Item Dashboard</h2>
+<p class="page-desc">All reported lost and found items</p>
+
+{% if items %}
+<div class="items-grid">
+
+    {% for item in items %}
+    <div class="item-card">
+
+        <!-- IMAGE -->
+        {% if item.image %}
+            <img src="{{ url_for('static', filename='uploads/' + item.image) }}"
+                 class="item-image">
+        {% else %}
+            <div class="no-image">No Image</div>
+        {% endif %}
+
+        <div class="item-content">
+
+            <div class="card-header">
+                <h3>{{ item.title }}</h3>
+
+                <span class="badge 
+                    {% if item.type == 'lost' %}badge-lost
+                    {% else %}badge-found{% endif %}">
+                    {{ item.type|capitalize }}
+                </span>
+            </div>
+
+            <p class="desc">{{ item.description }}</p>
+
+            <p><b>📍 Location:</b> {{ item.location }}</p>
+
+            <p>
+                <b>Status:</b>
+                <span class="status {{ item.status }}">
+                    {{ item.status|capitalize }}
+                </span>
+            </p>
+
+            {% if session.get("role") == "admin" %}
+                <div class="admin-actions">
+                    <a href="/delete/{{ item.id }}" class="btn danger small">
+                        Delete
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% else %}
+    <div class="empty-state">
+        <h3>No items reported yet 😔</h3>
+        <p>Be the first to report something.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

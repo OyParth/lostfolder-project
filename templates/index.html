@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section class="hero">
+
+    <h1>🎒 Lost & Found Management System</h1>
+
+    <p>
+        A centralized platform to report, track, and recover lost items efficiently.
+        Designed for campuses, hostels, and public spaces.
+    </p>
+
+    <div class="hero-actions">
+
+        {% if session.get("user") %}
+            <a class="btn primary" href="/report/lost">Report Lost Item</a>
+            <a class="btn success" href="/report/found">Report Found Item</a>
+            <a class="btn outline" href="/items">View Dashboard</a>
+        {% else %}
+            <a class="btn primary" href="/login">Login</a>
+            <a class="btn success" href="/register">Register</a>
+        {% endif %}
+
+    </div>
+
+</section>
+
+<!-- STATS SECTION -->
+<section class="stats">
+
+    <div class="stat-box">
+        <h2>{{ items_count }}</h2>
+        <p>Total Items Reported</p>
+    </div>
+
+    <div class="stat-box">
+        <h2>{{ lost_count }}</h2>
+        <p>Lost Items</p>
+    </div>
+
+    <div class="stat-box">
+        <h2>{{ found_count }}</h2>
+        <p>Found Items</p>
+    </div>
+
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+
+    <div class="feature-card">
+        <h3>📋 Easy Reporting</h3>
+        <p>Submit lost or found items in seconds using simple forms.</p>
+    </div>
+
+    <div class="feature-card">
+        <h3>🖼 Image Upload</h3>
+        <p>Upload images so users can easily identify their items.</p>
+    </div>
+
+    <div class="feature-card">
+        <h3>🔐 Secure Login System</h3>
+        <p>User and admin roles ensure accountability and control.</p>
+    </div>
+
+    <div class="feature-card">
+        <h3>📊 Admin Dashboard</h3>
+        <p>Admins can manage items, users, and export reports.</p>
+    </div>
+
+</section>
+
+{% endblock %}
