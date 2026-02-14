@@ -7,7 +7,8 @@ from openpyxl import Workbook
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key = os.environ.get("SECRET_KEY", "fallbacksecret")
+
 
 DATABASE = "database.db"
 UPLOAD_FOLDER = "static/uploads"
@@ -44,7 +45,7 @@ def init_db():
         location TEXT,
         type TEXT,
         image TEXT,
-        status TEXT DEFAULT 'pending'
+        status TEXT DEFAULT 'Pending'
     )
     """)
 
@@ -85,10 +86,10 @@ def home():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].lower()
         password = generate_password_hash(request.form["password"])
 
-        role = "admin" if username.lower() == "parth" else "user"
+        role = "admin" if username == "parth" else "user"
 
         conn = get_db()
         try:
@@ -109,7 +110,7 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].lower()
         password = request.form["password"]
 
         conn = get_db()
@@ -122,7 +123,11 @@ def login():
             session["user"] = user["username"]
             session["role"] = user["role"]
             flash("Login successful!")
-            return redirect(url_for("dashboard"))
+
+            if user["role"] == "admin":
+                return redirect(url_for("admin"))
+            else:
+                return redirect(url_for("home"))
         else:
             flash("Invalid credentials")
 
@@ -143,7 +148,7 @@ def logout():
 def dashboard():
     conn = get_db()
     items = conn.execute("SELECT * FROM items ORDER BY id DESC").fetchall()
-    return render_template("dashboard.html", items=items)
+    return redirect(url_for("index"))
 
 
 # ================= REPORT LOST =================
@@ -264,4 +269,3 @@ def export_excel():
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=5000, debug=True)
-
