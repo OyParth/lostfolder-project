@@ -148,7 +148,8 @@ def logout():
 def dashboard():
     conn = get_db()
     items = conn.execute("SELECT * FROM items ORDER BY id DESC").fetchall()
-    return redirect(url_for("index"))
+    conn.close() # Good practice to close the connection
+    return render_template("dashboard.html", items=items) # Use render_template, not redirect
 
 
 # ================= REPORT LOST =================
@@ -235,6 +236,7 @@ def admin():
     conn = get_db()
     users = conn.execute("SELECT * FROM users").fetchall()
     items = conn.execute("SELECT * FROM items").fetchall()
+    conn.close() # Add this line
     return render_template("admin.html", users=users, items=items)
 
 
