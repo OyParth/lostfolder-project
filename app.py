@@ -134,7 +134,7 @@ def login():
             if user["role"] == "admin":
                 return redirect(url_for("admin"))
             else:
-                return redirect(url_for("dashboard"))
+                return redirect(url_for("home"))
         else:
             flash("Invalid credentials")
 
