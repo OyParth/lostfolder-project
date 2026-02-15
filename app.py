@@ -9,9 +9,10 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "fallbacksecret")
 
-
-DATABASE = "database.db"
-UPLOAD_FOLDER = "static/uploads"
+# ================= PATH SETUP =================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "database.db")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -53,6 +54,10 @@ def init_db():
     conn.close()
 
 
+# 🔥 IMPORTANT: RUN DB INIT ON STARTUP (FOR RENDER)
+init_db()
+
+
 # ================= HELPERS =================
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -88,7 +93,6 @@ def register():
     if request.method == "POST":
         username = request.form["username"].lower()
         password = generate_password_hash(request.form["password"])
-
         role = "admin" if username == "parth" else "user"
 
         conn = get_db()
@@ -102,6 +106,8 @@ def register():
             return redirect(url_for("login"))
         except:
             flash("Username already exists!")
+        finally:
+            conn.close()
 
     return render_template("register.html")
 
@@ -118,6 +124,7 @@ def login():
             "SELECT * FROM users WHERE username=?",
             (username,)
         ).fetchone()
+        conn.close()
 
         if user and check_password_hash(user["password"], password):
             session["user"] = user["username"]
@@ -127,7 +134,7 @@ def login():
             if user["role"] == "admin":
                 return redirect(url_for("admin"))
             else:
-                return redirect(url_for("home"))
+                return redirect(url_for("dashboard"))
         else:
             flash("Invalid credentials")
 
@@ -148,8 +155,8 @@ def logout():
 def dashboard():
     conn = get_db()
     items = conn.execute("SELECT * FROM items ORDER BY id DESC").fetchall()
-    conn.close() # Good practice to close the connection
-    return render_template("dashboard.html", items=items) # Use render_template, not redirect
+    conn.close()
+    return render_template("dashboard.html", items=items)
 
 
 # ================= REPORT LOST =================
@@ -178,6 +185,7 @@ def report_lost():
             VALUES (?, ?, ?, 'Lost', ?)
         """, (title, description, location, filename))
         conn.commit()
+        conn.close()
 
         flash("Lost item reported successfully!")
         return redirect(url_for("dashboard"))
@@ -211,6 +219,7 @@ def report_found():
             VALUES (?, ?, ?, 'Found', ?)
         """, (title, description, location, filename))
         conn.commit()
+        conn.close()
 
         flash("Found item reported successfully!")
         return redirect(url_for("dashboard"))
@@ -225,6 +234,7 @@ def delete_item(item_id):
     conn = get_db()
     conn.execute("DELETE FROM items WHERE id=?", (item_id,))
     conn.commit()
+    conn.close()
     flash("Item deleted successfully")
     return redirect(url_for("dashboard"))
 
@@ -236,7 +246,7 @@ def admin():
     conn = get_db()
     users = conn.execute("SELECT * FROM users").fetchall()
     items = conn.execute("SELECT * FROM items").fetchall()
-    conn.close() # Add this line
+    conn.close()
     return render_template("admin.html", users=users, items=items)
 
 
@@ -246,6 +256,7 @@ def admin():
 def export_excel():
     conn = get_db()
     items = conn.execute("SELECT * FROM items").fetchall()
+    conn.close()
 
     wb = Workbook()
     ws = wb.active
@@ -261,13 +272,12 @@ def export_excel():
             item["status"]
         ])
 
-    file_path = "items.xlsx"
+    file_path = os.path.join(BASE_DIR, "items.xlsx")
     wb.save(file_path)
 
     return send_file(file_path, as_attachment=True)
 
 
-# ================= RUN =================
+# ================= RUN LOCAL ONLY =================
 if __name__ == "__main__":
-    init_db()
     app.run(host="0.0.0.0", port=5000, debug=True)
