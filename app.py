@@ -54,7 +54,6 @@ def init_db():
     conn.close()
 
 
-# 🔥 IMPORTANT: RUN DB INIT ON STARTUP (FOR RENDER)
 init_db()
 
 
@@ -84,7 +83,20 @@ def admin_required(f):
 # ================= HOME =================
 @app.route("/")
 def home():
-    return render_template("index.html")
+    conn = get_db()
+
+    items_count = conn.execute("SELECT COUNT(*) FROM items").fetchone()[0]
+    lost_count = conn.execute("SELECT COUNT(*) FROM items WHERE type='Lost'").fetchone()[0]
+    found_count = conn.execute("SELECT COUNT(*) FROM items WHERE type='Found'").fetchone()[0]
+
+    conn.close()
+
+    return render_template(
+        "index.html",
+        items_count=items_count,
+        lost_count=lost_count,
+        found_count=found_count
+    )
 
 
 # ================= REGISTER =================
@@ -131,10 +143,12 @@ def login():
             session["role"] = user["role"]
             flash("Login successful!")
 
+            # ✅ ONLY ADMIN goes to admin panel
             if user["role"] == "admin":
                 return redirect(url_for("admin"))
             else:
                 return redirect(url_for("home"))
+
         else:
             flash("Invalid credentials")
 
@@ -278,10 +292,6 @@ def export_excel():
     return send_file(file_path, as_attachment=True)
 
 
-# ================= INITIALIZE DATABASE =================
-init_db()
-
-# ================= RUN LOCAL ONLY =================
+# ================= RUN =================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
