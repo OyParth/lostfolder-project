@@ -278,6 +278,10 @@ def export_excel():
     return send_file(file_path, as_attachment=True)
 
 
+# ================= INITIALIZE DATABASE =================
+init_db()
+
 # ================= RUN LOCAL ONLY =================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
